@@ -1,0 +1,13 @@
+/home/sabina/Documents/gallery-backend/src/main/java/com/gallery/backend/GalleryBackendApplication.java
+/home/sabina/Documents/gallery-backend/src/main/java/com/gallery/backend/config/AppProperties.java
+/home/sabina/Documents/gallery-backend/src/main/java/com/gallery/backend/config/StorageConfig.java
+/home/sabina/Documents/gallery-backend/src/main/java/com/gallery/backend/config/WebConfig.java
+/home/sabina/Documents/gallery-backend/src/main/java/com/gallery/backend/controller/PhotoController.java
+/home/sabina/Documents/gallery-backend/src/main/java/com/gallery/backend/controller/TagController.java
+/home/sabina/Documents/gallery-backend/src/main/java/com/gallery/backend/dto/PhotoResponse.java
+/home/sabina/Documents/gallery-backend/src/main/java/com/gallery/backend/dto/PhotoUpdateRequest.java
+/home/sabina/Documents/gallery-backend/src/main/java/com/gallery/backend/entity/PhotoEntity.java
+/home/sabina/Documents/gallery-backend/src/main/java/com/gallery/backend/entity/TagEntity.java
+/home/sabina/Documents/gallery-backend/src/main/java/com/gallery/backend/repository/PhotoRepository.java
+/home/sabina/Documents/gallery-backend/src/main/java/com/gallery/backend/repository/TagRepository.java
+/home/sabina/Documents/gallery-backend/src/main/java/com/gallery/backend/service/PhotoService.java
