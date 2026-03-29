@@ -1,66 +1,43 @@
 package com.gallery.backend.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
-
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
-@Table(name = "photos")
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "photos")
 public class PhotoEntity {
 
     @Id
-    @Column(length = 36, nullable = false)
     private String id;
 
-    @Column(nullable = false, length = 200)
     private String title;
 
-    @Column(nullable = false, length = 1000)
     private String url;
 
-    @Column(name = "thumb_url", nullable = false, length = 1000)
     private String thumbUrl;
 
-    @Column(name = "storage_path", nullable = false, length = 1000)
     private String storagePath;
 
-    @Column(name = "thumb_storage_path", nullable = false, length = 1000)
     private String thumbStoragePath;
 
-    @Column(name = "mime_type", nullable = false, length = 100)
     private String mimeType;
 
-    @Column(name = "size_bytes", nullable = false)
     private long sizeBytes;
 
-    @Column(name = "created_at", nullable = false)
+    @Indexed
     private Instant createdAt;
 
-    @Column(nullable = false)
     private int width;
 
-    @Column(nullable = false)
     private int height;
 
-    @Column(nullable = false)
     private int likes;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "photo_tags",
-            joinColumns = @JoinColumn(name = "photo_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
-    )
-    private Set<TagEntity> tags = new HashSet<>();
+    private Set<String> tags = new HashSet<>();
 
     public String getId() {
         return id;
@@ -158,11 +135,11 @@ public class PhotoEntity {
         this.likes = likes;
     }
 
-    public Set<TagEntity> getTags() {
+    public Set<String> getTags() {
         return tags;
     }
 
-    public void setTags(Set<TagEntity> tags) {
+    public void setTags(Set<String> tags) {
         this.tags = tags;
     }
 }

@@ -38,9 +38,9 @@ public class PhotoController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PhotoResponse> createPhoto(
             @RequestPart("file") MultipartFile file,
-            @RequestPart("title") @NotBlank String title,
-            @RequestPart(value = "tags", required = false) List<String> tags,
-            @RequestPart(value = "likes", required = false) Integer likes
+            @RequestParam("title") @NotBlank String title,
+            @RequestParam(value = "tags", required = false) List<String> tags,
+            @RequestParam(value = "likes", required = false) Integer likes
     ) {
         return ResponseEntity.ok(photoService.create(file, title, tags, likes));
     }

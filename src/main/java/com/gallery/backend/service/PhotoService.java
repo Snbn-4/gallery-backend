@@ -4,14 +4,16 @@ import com.gallery.backend.config.AppProperties;
 import com.gallery.backend.dto.PhotoResponse;
 import com.gallery.backend.dto.PhotoUpdateRequest;
 import com.gallery.backend.entity.PhotoEntity;
-import com.gallery.backend.entity.TagEntity;
 import com.gallery.backend.repository.PhotoRepository;
-import com.gallery.backend.repository.TagRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -30,6 +32,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -43,12 +46,12 @@ public class PhotoService {
     private static final Set<String> ALLOWED_TYPES = Set.of("image/jpeg", "image/png");
 
     private final PhotoRepository photoRepository;
-    private final TagRepository tagRepository;
+    private final MongoTemplate mongoTemplate;
     private final AppProperties appProperties;
 
-    public PhotoService(PhotoRepository photoRepository, TagRepository tagRepository, AppProperties appProperties) {
+    public PhotoService(PhotoRepository photoRepository, MongoTemplate mongoTemplate, AppProperties appProperties) {
         this.photoRepository = photoRepository;
-        this.tagRepository = tagRepository;
+        this.mongoTemplate = mongoTemplate;
         this.appProperties = appProperties;
     }
 
@@ -104,9 +107,31 @@ public class PhotoService {
 
     public List<PhotoResponse> list(int page, int size, String tag, String search) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.min(Math.max(1, size), 100));
-        return photoRepository.findAllFiltered(normalizeNullable(tag), normalizeNullable(search), pageable)
-                .stream()
+        String normalizedTag = normalizeNullable(tag);
+        String normalizedSearch = normalizeNullable(search);
+
+        Query query = new Query().with(pageable).with(Sort.by(Sort.Direction.DESC, "createdAt"));
+        if (normalizedTag != null) {
+            query.addCriteria(Criteria.where("tags").regex("^" + escapeRegex(normalizedTag) + "$", "i"));
+        }
+        if (normalizedSearch != null) {
+            query.addCriteria(Criteria.where("title").regex(escapeRegex(normalizedSearch), "i"));
+        }
+
+        return mongoTemplate.find(query, PhotoEntity.class).stream()
                 .map(this::toDto)
+                .toList();
+    }
+
+    public List<String> listTags() {
+        return mongoTemplate.query(PhotoEntity.class)
+                .distinct("tags")
+                .as(String.class)
+                .all().stream()
+                .filter(StringUtils::hasText)
+                .map(String::trim)
+                .distinct()
+                .sorted(String.CASE_INSENSITIVE_ORDER)
                 .toList();
     }
 
@@ -171,24 +196,15 @@ public class PhotoService {
         }
     }
 
-    private Set<TagEntity> resolveTags(List<String> tags) {
+    private Set<String> resolveTags(List<String> tags) {
         if (tags == null || tags.isEmpty()) {
             return new HashSet<>();
         }
         return tags.stream()
                 .filter(StringUtils::hasText)
                 .map(String::trim)
-                .map(this::findOrCreateTag)
+                .map(tag -> tag.toLowerCase(Locale.ROOT))
                 .collect(Collectors.toCollection(HashSet::new));
-    }
-
-    private TagEntity findOrCreateTag(String tagName) {
-        return tagRepository.findByNameIgnoreCase(tagName)
-                .orElseGet(() -> {
-                    TagEntity tag = new TagEntity();
-                    tag.setName(tagName);
-                    return tagRepository.save(tag);
-                });
     }
 
     private PhotoResponse toDto(PhotoEntity photo) {
@@ -238,5 +254,9 @@ public class PhotoService {
 
     private String normalizeNullable(String value) {
         return StringUtils.hasText(value) ? value.trim() : null;
+    }
+
+    private String escapeRegex(String value) {
+        return java.util.regex.Pattern.quote(value);
     }
 }

@@ -1,4 +1,4 @@
-# Gallery Backend (Java + MSSQL)
+# Gallery Backend (Java + MongoDB)
 
 Simple Spring Boot backend for photo gallery metadata + file upload.
 
@@ -6,13 +6,12 @@ Simple Spring Boot backend for photo gallery metadata + file upload.
 
 - Java 17
 - Spring Boot 3
-- SQL Server (MSSQL)
-- Flyway migrations
+- MongoDB
 
 ## Run
 
-1. Create a SQL Server database named `gallery_db`.
-2. Update DB credentials in `src/main/resources/application.yml`.
+1. Start MongoDB locally (default: `mongodb://localhost:27017`).
+2. Update DB connection URI in `src/main/resources/application.yml` if needed.
 3. Start app:
 
 ```bash

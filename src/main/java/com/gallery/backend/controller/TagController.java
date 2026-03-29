@@ -1,6 +1,6 @@
 package com.gallery.backend.controller;
 
-import com.gallery.backend.repository.TagRepository;
+import com.gallery.backend.service.PhotoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,19 +12,15 @@ import java.util.List;
 @RequestMapping("/api/tags")
 public class TagController {
 
-    private final TagRepository tagRepository;
+    private final PhotoService photoService;
 
-    public TagController(TagRepository tagRepository) {
-        this.tagRepository = tagRepository;
+    public TagController(PhotoService photoService) {
+        this.photoService = photoService;
     }
 
     @GetMapping
     public ResponseEntity<List<String>> listTags() {
-        List<String> tags = tagRepository.findAll()
-                .stream()
-                .map(tag -> tag.getName())
-                .sorted(String.CASE_INSENSITIVE_ORDER)
-                .toList();
+        List<String> tags = photoService.listTags();
         return ResponseEntity.ok(tags);
     }
 }
